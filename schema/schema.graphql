@@ -1,0 +1,23 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  node(id: ID!): Node!
+}
+
+# Объект с ID
+interface Node {
+  id: ID!
+}
+
+# Товар в каталоге
+type Product implements Node {
+  # Уникальный идентификатор товара
+  id: ID!
+}
+
+type Mutation {
+  createProduct: Product!
+}

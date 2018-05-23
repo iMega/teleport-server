@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package api;
+
+// Описывает идентифицированный в каталоге товар
+message Product {
+    // Идентификатор Товара
+    string id = 1;
+    // Наименование товара
+    string title = 2;
+    // описание товара
+    string description = 3;
+}
