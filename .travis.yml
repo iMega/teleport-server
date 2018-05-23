@@ -1,0 +1,8 @@
+branches:
+  only:
+  - master
+language: ruby
+services:
+- docker
+script:
+- make build test || exit 1
