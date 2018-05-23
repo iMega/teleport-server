@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+  app:
+    image: imega/teleport-server:latest
+
+  db:
+    image: mysql:5.7.19
+    environment:
+      - MYSQL_ROOT_PASSWORD=qwerty
+      - MYSQL_DATABASE=stock
+    volumes:
+      - ./schemas:/docker-entrypoint-initdb.d
+      - ./schemas/mysql/cnf:/etc/mysql/conf.d
+      - ./mysql.log:/var/log/mysql/mysql.log
