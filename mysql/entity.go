@@ -18,6 +18,8 @@ import (
 type Datastore interface {
 	CreateEntity(context.Context, Entity) (Entity, error)
 	GetEntityByID(context.Context, string) (Entity, error)
+	DeleteEntity(context.Context, uuid.UID) error
+
 	HealthCheckFunc() health.HealthCheckFunc
 	ShutdownFunc() shutdown.ShutdownFunc
 }
@@ -42,6 +44,7 @@ type entityDB struct {
 
 	insert *sql.Stmt
 	update *sql.Stmt
+	delete *sql.Stmt
 }
 
 func (db *entityDB) HealthCheckFunc() health.HealthCheckFunc {
@@ -97,6 +100,10 @@ func (db *entityDB) setParepares() error {
 		return fmt.Errorf("failed to prepare update query, %s", err)
 	}
 
+	if db.delete, err = db.conn.Prepare("UPDATE entities SET deleted=1 WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
+		return fmt.Errorf("failed to prepare delete query, %s", err)
+	}
+
 	return nil
 }
 
@@ -111,7 +118,7 @@ func (db *entityDB) CreateEntity(ctx context.Context, e Entity) (Entity, error) 
 	if _, err := marshaller.MarshalToString(e); err != nil {
 		return nil, fmt.Errorf("could not create entity, %s", err)
 	}
-	if _, err := execAffectingOneRow(ctx, db.insert, uuid.UID(ownerID), uuid.UID(e.GetId()), entityType, "{}"); err != nil {
+	if _, err := execAffectingOneRow(ctx, db.insert, ownerID, uuid.UID(e.GetId()), entityType, "{}"); err != nil {
 		return nil, fmt.Errorf("failed to insert entity, %s", err)
 	}
 
@@ -120,6 +127,19 @@ func (db *entityDB) CreateEntity(ctx context.Context, e Entity) (Entity, error) 
 
 func (db *entityDB) GetEntityByID(ctx context.Context, ID string) (Entity, error) {
 	return nil, nil
+}
+
+func (db *entityDB) DeleteEntity(ctx context.Context, entityID uuid.UID) error {
+	ownerID, err := getOwnerIDFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if _, err := execAffectingOneRow(ctx, db.delete, ownerID, entityID); err != nil {
+		return fmt.Errorf("failed to delete entity, %s", err)
+	}
+
+	return nil
 }
 
 func execAffectingOneRow(ctx context.Context, stmt *sql.Stmt, args ...interface{}) (sql.Result, error) {
@@ -136,9 +156,9 @@ func execAffectingOneRow(ctx context.Context, stmt *sql.Stmt, args ...interface{
 	return r, nil
 }
 
-func getOwnerIDFromContext(ctx context.Context) (string, error) {
+func getOwnerIDFromContext(ctx context.Context) (uuid.UID, error) {
 	if id, ok := ctx.Value("owner_id").(string); ok {
-		return id, nil
+		return uuid.UID(id), nil
 	}
 	return "", fmt.Errorf("failed to extract owner id from context")
 }
