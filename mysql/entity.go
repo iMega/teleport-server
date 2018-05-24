@@ -60,7 +60,7 @@ func (db *entityDB) HealthCheckFunc() health.HealthCheckFunc {
 			return false
 		}
 
-		if db.insert == nil {
+		if db.create == nil {
 			if err := db.setParepares(); err != nil {
 				db.logger.Error(err)
 				return false
