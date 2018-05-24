@@ -26,8 +26,7 @@ CREATE TABLE `relations` (
   `object_id`  BINARY(16)          NOT NULL COMMENT 'Идентификатор объекта',
   `priority`   BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Порядок выдачи по умолчанию',
   `deleted`    TINYINT(2)          NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  INDEX (`owner_id`, `object_id`,`predicate`, `deleted`),
+  PRIMARY KEY `id` (`owner_id`, `object_id`,`predicate`, `deleted`),
   KEY priority_index (`owner_id`, `subject_id`,`predicate`,`deleted`, `priority`)
 )
   ENGINE = InnoDB
