@@ -155,14 +155,6 @@ func (db *entityDB) DeleteEntity(ctx context.Context, entityID uuid.UID) error {
 	return nil
 }
 
-func (db *entityDB) CreateRelation(ctx context.Context, subject uuid.UID, predicate string, object uuid.UID, priority int) error {
-	return nil
-}
-
-func (db *entityDB) DeleteRelation(ctx context.Context, subject, object uuid.UID) error {
-	return nil
-}
-
 func execAffectingOneRow(ctx context.Context, stmt *sql.Stmt, args ...interface{}) (sql.Result, error) {
 	r, err := stmt.ExecContext(ctx, args...)
 	if err != nil {
