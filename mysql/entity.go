@@ -45,11 +45,11 @@ type entityDB struct {
 	conn   *sql.DB
 	logger *logrus.Entry
 
-	insert *sql.Stmt
+	create *sql.Stmt
 	update *sql.Stmt
 	delete *sql.Stmt
 
-	insertRelation *sql.Stmt
+	createRelation *sql.Stmt
 	deleteRelation *sql.Stmt
 }
 
@@ -97,7 +97,7 @@ func NewEntityDB(l *logrus.Entry) (Datastore, error) {
 func (db *entityDB) setParepares() error {
 	var err error
 
-	if db.insert, err = db.conn.Prepare("INSERT INTO entities(owner_id,entity_id,entity_type,entity)VALUES(?,?,?,?)"); err != nil {
+	if db.create, err = db.conn.Prepare("INSERT INTO entities(owner_id,entity_id,entity_type,entity)VALUES(?,?,?,?)"); err != nil {
 		return fmt.Errorf("failed to prepare insert query, %s", err)
 	}
 
@@ -109,7 +109,7 @@ func (db *entityDB) setParepares() error {
 		return fmt.Errorf("failed to prepare delete query, %s", err)
 	}
 
-	if db.insertRelation, err = db.conn.Prepare("INSERT INTO relations(owner_id,subject_id,predicate,object_id,priority)VALUES(?,?,?,?,?)"); err != nil {
+	if db.createRelation, err = db.conn.Prepare("INSERT INTO relations(owner_id,subject_id,predicate,object_id,priority)VALUES(?,?,?,?,?)"); err != nil {
 		return fmt.Errorf("failed to prepare insert relations query, %s", err)
 	}
 
