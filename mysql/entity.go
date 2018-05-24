@@ -100,8 +100,8 @@ func (db *entityDB) setParepares() error {
 		return fmt.Errorf("failed to prepare update query, %s", err)
 	}
 
-	if db.delete, err = db.conn.Prepare("UPDATE entities SET delete=1 WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
-		return fmt.Errorf("failed to prepare update query, %s", err)
+	if db.delete, err = db.conn.Prepare("UPDATE entities SET deleted=1 WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
+		return fmt.Errorf("failed to prepare delete query, %s", err)
 	}
 
 	return nil
