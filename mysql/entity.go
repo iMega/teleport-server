@@ -20,6 +20,9 @@ type Datastore interface {
 	GetEntityByID(context.Context, string) (Entity, error)
 	DeleteEntity(context.Context, uuid.UID) error
 
+	CreateRelation(ctx context.Context, subject uuid.UID, predicate string, object uuid.UID, priority int) error
+	DeleteRelation(ctx context.Context, subject, object uuid.UID) error
+
 	HealthCheckFunc() health.HealthCheckFunc
 	ShutdownFunc() shutdown.ShutdownFunc
 }
@@ -42,20 +45,22 @@ type entityDB struct {
 	conn   *sql.DB
 	logger *logrus.Entry
 
-	insert *sql.Stmt
+	create *sql.Stmt
 	update *sql.Stmt
 	delete *sql.Stmt
+
+	createRelation *sql.Stmt
+	deleteRelation *sql.Stmt
 }
 
 func (db *entityDB) HealthCheckFunc() health.HealthCheckFunc {
 	return func() bool {
-		db.logger.Info("HealthCheckFunc")
 		if err := db.conn.Ping(); err != nil {
 			db.logger.Errorf("health: failed to ping database, %s", err)
 			return false
 		}
-		db.logger.Info("db.conn.Ping")
-		if db.insert == nil {
+
+		if db.create == nil {
 			if err := db.setParepares(); err != nil {
 				db.logger.Error(err)
 				return false
@@ -92,7 +97,7 @@ func NewEntityDB(l *logrus.Entry) (Datastore, error) {
 func (db *entityDB) setParepares() error {
 	var err error
 
-	if db.insert, err = db.conn.Prepare("INSERT INTO entities(owner_id,entity_id,entity_type,entity)VALUES(?,?,?,?)"); err != nil {
+	if db.create, err = db.conn.Prepare("INSERT INTO entities(owner_id,entity_id,entity_type,entity)VALUES(?,?,?,?)"); err != nil {
 		return fmt.Errorf("failed to prepare insert query, %s", err)
 	}
 
@@ -102,6 +107,14 @@ func (db *entityDB) setParepares() error {
 
 	if db.delete, err = db.conn.Prepare("UPDATE entities SET deleted=1 WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
 		return fmt.Errorf("failed to prepare delete query, %s", err)
+	}
+
+	if db.createRelation, err = db.conn.Prepare("INSERT INTO relations(owner_id,subject_id,predicate,object_id,priority)VALUES(?,?,?,?,?)"); err != nil {
+		return fmt.Errorf("failed to prepare insert relations query, %s", err)
+	}
+
+	if db.deleteRelation, err = db.conn.Prepare("UPDATE relations SET deleted=1 WHERE owner_id=? AND subject_id=? AND object_id=? AND deleted=0"); err != nil {
+		return fmt.Errorf("failed to prepare delete relations query, %s", err)
 	}
 
 	return nil
@@ -118,7 +131,7 @@ func (db *entityDB) CreateEntity(ctx context.Context, e Entity) (Entity, error) 
 	if _, err := marshaller.MarshalToString(e); err != nil {
 		return nil, fmt.Errorf("could not create entity, %s", err)
 	}
-	if _, err := execAffectingOneRow(ctx, db.insert, ownerID, uuid.UID(e.GetId()), entityType, "{}"); err != nil {
+	if _, err := execAffectingOneRow(ctx, db.create, ownerID, uuid.UID(e.GetId()), entityType, "{}"); err != nil {
 		return nil, fmt.Errorf("failed to insert entity, %s", err)
 	}
 
