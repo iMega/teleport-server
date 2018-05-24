@@ -20,6 +20,9 @@ type Datastore interface {
 	GetEntityByID(context.Context, string) (Entity, error)
 	DeleteEntity(context.Context, uuid.UID) error
 
+	CreateRelation(ctx context.Context, subject uuid.UID, predicate string, object uuid.UID, priority int) error
+	DeleteRelation(ctx context.Context, subject, object uuid.UID) error
+
 	HealthCheckFunc() health.HealthCheckFunc
 	ShutdownFunc() shutdown.ShutdownFunc
 }
@@ -106,6 +109,14 @@ func (db *entityDB) setParepares() error {
 		return fmt.Errorf("failed to prepare delete query, %s", err)
 	}
 
+	if db.insertRelation, err = db.conn.Prepare("INSERT INTO relations(owner_id,subject_id,predicate,object_id,priority)VALUES(?,?,?,?,?)"); err != nil {
+		return fmt.Errorf("failed to prepare insert relations query, %s", err)
+	}
+
+	if db.deleteRelation, err = db.conn.Prepare("UPDATE relations SET deleted=1 WHERE owner_id=? AND subject_id=? AND object_id=? AND deleted=0"); err != nil {
+		return fmt.Errorf("failed to prepare delete relations query, %s", err)
+	}
+
 	return nil
 }
 
@@ -141,6 +152,14 @@ func (db *entityDB) DeleteEntity(ctx context.Context, entityID uuid.UID) error {
 		return fmt.Errorf("failed to delete entity, %s", err)
 	}
 
+	return nil
+}
+
+func (db *entityDB) CreateRelation(ctx context.Context, subject uuid.UID, predicate string, object uuid.UID, priority int) error {
+	return nil
+}
+
+func (db *entityDB) DeleteRelation(ctx context.Context, subject, object uuid.UID) error {
 	return nil
 }
 

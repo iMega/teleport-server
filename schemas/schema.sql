@@ -25,6 +25,8 @@ CREATE TABLE `relations` (
   `predicate`  VARCHAR(64)         NOT NULL COMMENT 'предикат',
   `object_id`  BINARY(16)          NOT NULL COMMENT 'Идентификатор объекта',
   `priority`   BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Порядок выдачи по умолчанию',
+  `created`    DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата создания записи',
+  `updated`    DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Дата обновления записи',
   `deleted`    TINYINT(2)          NOT NULL DEFAULT 0,
   PRIMARY KEY `id` (`owner_id`, `object_id`,`predicate`, `deleted`),
   KEY priority_index (`owner_id`, `subject_id`,`predicate`,`deleted`, `priority`)
