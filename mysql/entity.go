@@ -45,16 +45,18 @@ type entityDB struct {
 	insert *sql.Stmt
 	update *sql.Stmt
 	delete *sql.Stmt
+
+	insertRelation *sql.Stmt
+	deleteRelation *sql.Stmt
 }
 
 func (db *entityDB) HealthCheckFunc() health.HealthCheckFunc {
 	return func() bool {
-		db.logger.Info("HealthCheckFunc")
 		if err := db.conn.Ping(); err != nil {
 			db.logger.Errorf("health: failed to ping database, %s", err)
 			return false
 		}
-		db.logger.Info("db.conn.Ping")
+
 		if db.insert == nil {
 			if err := db.setParepares(); err != nil {
 				db.logger.Error(err)
