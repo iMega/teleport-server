@@ -131,7 +131,7 @@ func (db *entityDB) CreateEntity(ctx context.Context, e Entity) (Entity, error) 
 	if _, err := marshaller.MarshalToString(e); err != nil {
 		return nil, fmt.Errorf("could not create entity, %s", err)
 	}
-	if _, err := execAffectingOneRow(ctx, db.insert, ownerID, uuid.UID(e.GetId()), entityType, "{}"); err != nil {
+	if _, err := execAffectingOneRow(ctx, db.create, ownerID, uuid.UID(e.GetId()), entityType, "{}"); err != nil {
 		return nil, fmt.Errorf("failed to insert entity, %s", err)
 	}
 
