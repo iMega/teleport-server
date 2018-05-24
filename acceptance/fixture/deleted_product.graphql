@@ -1,0 +1,3 @@
+mutation DeletedProduct($id: ID!) {
+    deletedProduct(id: $id)
+}
