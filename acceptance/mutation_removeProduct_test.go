@@ -27,12 +27,12 @@ var _ = Describe("Тестирование удаления ноды, через
 			vars := map[string]string{
 				"id": product.GetId(),
 			}
-			body, bc := helper.RequestGraphQL(ownerID, "fixture/delete_product.graphql", vars, "DeleteProduct")
+			body, bc := helper.RequestGraphQL(ownerID, "fixture/remove_product.graphql", vars, "RemoveProduct")
 			defer bc()
 
 			type (
 				Data struct {
-					Deleted bool `json:"deleteProduct"`
+					Removed bool `json:"removeProduct"`
 				}
 				Response struct {
 					Data Data `json:"data"`
@@ -42,7 +42,7 @@ var _ = Describe("Тестирование удаления ноды, через
 			err := json.Unmarshal(body, resp)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(resp.Data.Deleted).To(Equal(true))
+			Expect(resp.Data.Removed).To(Equal(true))
 		})
 	})
 })

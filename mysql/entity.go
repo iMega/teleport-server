@@ -101,20 +101,20 @@ func (db *entityDB) setParepares() error {
 		return fmt.Errorf("failed to prepare insert query, %s", err)
 	}
 
-	if db.update, err = db.conn.Prepare("UPDATE entities SET entity=? WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
+	if db.update, err = db.conn.Prepare("UPDATE entities SET entity=? WHERE owner_id=? AND entity_id=? AND removed=0"); err != nil {
 		return fmt.Errorf("failed to prepare update query, %s", err)
 	}
 
-	if db.remove, err = db.conn.Prepare("UPDATE entities SET deleted=1 WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
-		return fmt.Errorf("failed to prepare delete query, %s", err)
+	if db.remove, err = db.conn.Prepare("UPDATE entities SET removed=1 WHERE owner_id=? AND entity_id=? AND removed=0"); err != nil {
+		return fmt.Errorf("failed to prepare remove query, %s", err)
 	}
 
 	if db.createRelation, err = db.conn.Prepare("INSERT INTO relations(owner_id,subject_id,predicate,object_id,priority)VALUES(?,?,?,?,?)"); err != nil {
 		return fmt.Errorf("failed to prepare insert relations query, %s", err)
 	}
 
-	if db.deleteRelation, err = db.conn.Prepare("UPDATE relations SET deleted=1 WHERE owner_id=? AND subject_id=? AND object_id=? AND deleted=0"); err != nil {
-		return fmt.Errorf("failed to prepare delete relations query, %s", err)
+	if db.deleteRelation, err = db.conn.Prepare("UPDATE relations SET removed=1 WHERE owner_id=? AND subject_id=? AND object_id=? AND removed=0"); err != nil {
+		return fmt.Errorf("failed to prepare remove relations query, %s", err)
 	}
 
 	return nil
