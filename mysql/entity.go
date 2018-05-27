@@ -18,7 +18,7 @@ import (
 type Datastore interface {
 	CreateEntity(context.Context, Entity) (Entity, error)
 	GetEntityByID(context.Context, string) (Entity, error)
-	DeleteEntity(context.Context, uuid.UID) error
+	RemoveEntity(context.Context, uuid.UID) error
 
 	CreateRelation(ctx context.Context, subject uuid.UID, predicate string, object uuid.UID, priority int) error
 	DeleteRelation(ctx context.Context, subject, object uuid.UID) error
@@ -47,7 +47,7 @@ type entityDB struct {
 
 	create *sql.Stmt
 	update *sql.Stmt
-	delete *sql.Stmt
+	remove *sql.Stmt
 
 	createRelation *sql.Stmt
 	deleteRelation *sql.Stmt
@@ -101,20 +101,20 @@ func (db *entityDB) setParepares() error {
 		return fmt.Errorf("failed to prepare insert query, %s", err)
 	}
 
-	if db.update, err = db.conn.Prepare("UPDATE entities SET entity=? WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
+	if db.update, err = db.conn.Prepare("UPDATE entities SET entity=? WHERE owner_id=? AND entity_id=? AND removed=0"); err != nil {
 		return fmt.Errorf("failed to prepare update query, %s", err)
 	}
 
-	if db.delete, err = db.conn.Prepare("UPDATE entities SET deleted=1 WHERE owner_id=? AND entity_id=? AND deleted=0"); err != nil {
-		return fmt.Errorf("failed to prepare delete query, %s", err)
+	if db.remove, err = db.conn.Prepare("UPDATE entities SET removed=1 WHERE owner_id=? AND entity_id=? AND removed=0"); err != nil {
+		return fmt.Errorf("failed to prepare remove query, %s", err)
 	}
 
 	if db.createRelation, err = db.conn.Prepare("INSERT INTO relations(owner_id,subject_id,predicate,object_id,priority)VALUES(?,?,?,?,?)"); err != nil {
 		return fmt.Errorf("failed to prepare insert relations query, %s", err)
 	}
 
-	if db.deleteRelation, err = db.conn.Prepare("UPDATE relations SET deleted=1 WHERE owner_id=? AND subject_id=? AND object_id=? AND deleted=0"); err != nil {
-		return fmt.Errorf("failed to prepare delete relations query, %s", err)
+	if db.deleteRelation, err = db.conn.Prepare("UPDATE relations SET removed=1 WHERE owner_id=? AND subject_id=? AND object_id=? AND removed=0"); err != nil {
+		return fmt.Errorf("failed to prepare remove relations query, %s", err)
 	}
 
 	return nil
@@ -142,14 +142,14 @@ func (db *entityDB) GetEntityByID(ctx context.Context, ID string) (Entity, error
 	return nil, nil
 }
 
-func (db *entityDB) DeleteEntity(ctx context.Context, entityID uuid.UID) error {
+func (db *entityDB) RemoveEntity(ctx context.Context, entityID uuid.UID) error {
 	ownerID, err := getOwnerIDFromContext(ctx)
 	if err != nil {
 		return err
 	}
 
-	if _, err := execAffectingOneRow(ctx, db.delete, ownerID, entityID); err != nil {
-		return fmt.Errorf("failed to delete entity, %s", err)
+	if _, err := execAffectingOneRow(ctx, db.remove, ownerID, entityID); err != nil {
+		return fmt.Errorf("failed to remove entity, %s", err)
 	}
 
 	return nil

@@ -11,7 +11,7 @@ CREATE TABLE `entities` (
   `entity`      JSON         NOT NULL COMMENT 'сущность',
   `created`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата создания записи',
   `updated`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Дата обновления записи',
-  `deleted`     TINYINT(2)   NOT NULL DEFAULT 0 COMMENT 'состояние удален',
+  `removed`     TINYINT(2)   NOT NULL DEFAULT 0 COMMENT 'доступность записи для чтения',
   PRIMARY KEY `id` (`owner_id`, `entity_id`),
   UNIQUE KEY `entity_id` (`entity_id`)
 )
@@ -27,9 +27,9 @@ CREATE TABLE `relations` (
   `priority`   BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Порядок выдачи по умолчанию',
   `created`    DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Дата создания записи',
   `updated`    DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Дата обновления записи',
-  `deleted`    TINYINT(2)          NOT NULL DEFAULT 0,
-  PRIMARY KEY `id` (`owner_id`, `object_id`,`predicate`, `deleted`),
-  KEY priority_index (`owner_id`, `subject_id`,`predicate`,`deleted`, `priority`)
+  `removed`    TINYINT(2)          NOT NULL DEFAULT 0,
+  PRIMARY KEY `id` (`owner_id`, `object_id`,`predicate`, `removed`),
+  KEY priority_index (`owner_id`, `subject_id`,`predicate`,`removed`, `priority`)
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8
