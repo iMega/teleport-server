@@ -22,11 +22,11 @@ type Mutation {
   createProduct: Product!
   removeProduct(id: ID!): Boolean!
 
-  createUser: User!
+  createUser(pass: String!): User!
 }
 
 type User implements Node {
-  login: String!
+  id: ID!
   pass: String!
   active: Boolean!
 }
