@@ -11,3 +11,9 @@ message Product {
     // описание товара
     string description = 3;
 }
+
+message User {
+    string id = 1;
+    string pass = 2;
+    bool active = 3;
+}
