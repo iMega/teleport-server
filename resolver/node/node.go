@@ -47,3 +47,14 @@ func (r *NodeResolver) ToProduct() (*ProductResolver, bool) {
 
 	return nil, false
 }
+
+func (r *NodeResolver) ToUser() (*UserResolver, bool) {
+	if p, ok := r.node.(*api.User); ok {
+		return NewUserResolver(
+			WithDatastore(r.datastore),
+			WithNode(p),
+		), true
+	}
+
+	return nil, false
+}
