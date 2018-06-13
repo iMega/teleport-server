@@ -5,6 +5,7 @@ schema {
 
 type Query {
   node(id: ID!): Node!
+  checkToken(token: String!): User!
 }
 
 # Объект с ID
