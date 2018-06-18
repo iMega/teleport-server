@@ -4,7 +4,7 @@ services:
   app:
     image: imegateleport/teleport-server:latest
 
-  db:
+  imega-teleport-db:
     image: mysql:5.7.19
     environment:
       - MYSQL_ROOT_PASSWORD=qwerty

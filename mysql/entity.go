@@ -81,7 +81,7 @@ func (db *entityDB) ShutdownFunc() shutdown.ShutdownFunc {
 }
 
 func NewEntityDB(l *logrus.Entry) (Datastore, error) {
-	conn, err := sql.Open("mysql", "root:qwerty@tcp(db:3306)/stock?charset=utf8")
+	conn, err := sql.Open("mysql", "root:qwerty@tcp(imega-teleport-db:3306)/stock?charset=utf8")
 	if err != nil {
 		return nil, fmt.Errorf("failed to set driver, %s", err)
 	}
