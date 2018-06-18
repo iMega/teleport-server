@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   app:
-    image: imega/teleport-server:latest
+    image: imegateleport/teleport-server:latest
 
   db:
     image: mysql:5.7.19
