@@ -2,7 +2,7 @@ PROJECT_NAME=imega/teleport-server
 GO_PROJECT=github.com/$(PROJECT_NAME)
 CWD=/go/src/$(GO_PROJECT)
 TAG=latest
-IMG=imega/teleport-server
+IMG=imegateleport/teleport-server
 
 GO_IMG=golang:1.10-alpine
 GOLANG_VERSION="1.10"
@@ -35,3 +35,10 @@ error:
 	@docker ps --filter 'status=exited' -q | xargs docker logs
 
 test: clean build acceptance
+
+release: build
+	@docker login --username $(DOCKER_USER) --password $(DOCKER_PASS)
+	@docker push $(IMG):$(TAG)
+
+deploy:
+	@curl -s -X POST -H "TOKEN: $(DEPLOY_TOKEN)" https://d.imega.ru -d '{"namespace":"imega-teleport", "project_name":"teleport-server", "tag":"$(TAG)"}'

@@ -24,6 +24,7 @@ type Mutation {
   removeProduct(id: ID!): Boolean!
 
   createUser(pass: String!): User!
+  createToken(id: ID!, pass: String!): String!
 }
 
 type User implements Node {

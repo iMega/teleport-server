@@ -17,3 +17,8 @@ message User {
     string pass = 2;
     bool active = 3;
 }
+
+message Token {
+    string id = 1;
+    string value = 2;
+}
