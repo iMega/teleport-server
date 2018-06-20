@@ -184,7 +184,7 @@ func (db *entityDB) GetEntityByID(ctx context.Context, ID string) (Entity, error
 		switch {
 		case err == sql.ErrNoRows:
 			return nil, fmt.Errorf("entity not found")
-		case err != nil:
+		default:
 			return nil, fmt.Errorf("failed getting entity, %s", err)
 		}
 	}
