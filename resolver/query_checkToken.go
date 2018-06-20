@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/imega/teleport-server/api"
 	"github.com/imega/teleport-server/resolver/node"
 	"github.com/imega/teleport-server/token"
 )
@@ -39,10 +40,25 @@ func (r *Resolver) CheckToken(ctx context.Context, in QueryCheckTokenInput) (*no
 		return nil, err
 	}
 
-	n, err := r.EntityDB.GetEntityByID(ctx, claim.Id)
-
+	tokenNode, err := r.EntityDB.GetEntityByID(ctx, claim.Id)
 	if err != nil {
-		return nil, fmt.Errorf("CheckToken: failed geting login by token, %s", err)
+		return nil, fmt.Errorf("CheckToken: failed geting ownerID by token, %s", err)
 	}
-	return node.NewUserResolver(node.WithNode(n), node.WithDatastore(r.EntityDB)), nil
+
+	apiToken, ok := tokenNode.(*api.Token)
+	if !ok {
+		return nil, fmt.Errorf("CheckToken: failed to convert entity to api.token, %s", err)
+	}
+
+	userNode, err := r.EntityDB.GetEntityByID(ctx, apiToken.OwnerId)
+	if err != nil {
+		return nil, fmt.Errorf("CheckToken: failed geting user by token, %s", err)
+	}
+
+	user, ok := userNode.(*api.User)
+	if !ok {
+		return nil, fmt.Errorf("CheckToken: failed to convert entity to api.user, %s", err)
+	}
+
+	return node.NewUserResolver(node.WithNode(user), node.WithDatastore(r.EntityDB)), nil
 }

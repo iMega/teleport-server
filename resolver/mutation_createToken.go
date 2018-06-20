@@ -7,6 +7,7 @@ import (
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/imega/teleport-server/api"
+	"github.com/imega/teleport-server/owner"
 	"github.com/imega/teleport-server/token"
 	"github.com/imega/teleport-server/uuid"
 	"github.com/improbable-eng/go-httpwares/logging/logrus/ctxlogrus"
@@ -41,6 +42,11 @@ func (i *CreateTokenInput) GetPass() *string {
 // CreateToken создание токена
 func (r *Resolver) CreateToken(ctx context.Context, in CreateTokenInput) (string, error) {
 	logger := ctxlogrus.Extract(ctx)
+	ownerID, err := owner.GetOwnerIDFromContext(ctx)
+	if err != nil {
+		logger.Errorf("CreateToken: failed getting ownerID, %s", err)
+		return "", err
+	}
 
 	if !in.HasPass() {
 		logger.Errorf("CreateToken: password is empty")
@@ -55,8 +61,9 @@ func (r *Resolver) CreateToken(ctx context.Context, in CreateTokenInput) (string
 	}
 
 	_, err = r.EntityDB.CreateEntity(ctx, &api.Token{
-		Id:    string(entityID),
-		Value: tokenStr,
+		Id:      string(entityID),
+		Value:   tokenStr,
+		OwnerId: string(ownerID),
 	})
 	if err != nil {
 		logger.Errorf("CreateToken: %s", err)

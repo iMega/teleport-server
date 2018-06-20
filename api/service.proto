@@ -21,4 +21,5 @@ message User {
 message Token {
     string id = 1;
     string value = 2;
+    string owner_id = 3;
 }

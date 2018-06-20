@@ -164,10 +164,11 @@ func (db *entityDB) CreateEntity(ctx context.Context, e Entity) (Entity, error) 
 
 	entityType := proto.MessageName(e)
 
-	if _, err := marshaller.MarshalToString(e); err != nil {
+	data, err := marshaller.MarshalToString(e)
+	if err != nil {
 		return nil, fmt.Errorf("could not create entity, %s", err)
 	}
-	if _, err := execAffectingOneRow(ctx, db.create, ownerID, uuid.UID(e.GetId()), entityType, "{}"); err != nil {
+	if _, err := execAffectingOneRow(ctx, db.create, ownerID, uuid.UID(e.GetId()), entityType, data); err != nil {
 		return nil, fmt.Errorf("failed to insert entity, %s", err)
 	}
 
