@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run: |
           make build TAG=`echo $CIRCLE_SHA1 | cut -c -7`
-  build:
+  deploy:
     machine:
       enabled: true
     branches:
