@@ -36,8 +36,11 @@ func (r *Resolver) CreateUser(ctx context.Context, args CreateUserInput) (*node.
 		return nil, fmt.Errorf("password is empty")
 	}
 
+	ownerID := string(uuid.NewUUID())
+	ctx = context.WithValue(ctx, "owner_id", ownerID)
+
 	entity, err := r.EntityDB.CreateEntity(ctx, &api.User{
-		Id:     string(uuid.NewUUID()),
+		Id:     ownerID,
 		Pass:   *args.GetPass(),
 		Active: false,
 	})
