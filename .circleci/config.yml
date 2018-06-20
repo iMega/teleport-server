@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          make release DOCKER_USER=$DOCKER_USER DOCKER_PASS=$DOCKER_PASS TAG=`echo $CIRCLE_SHA1 | cut -c -7`
+          make build TAG=`echo $CIRCLE_SHA1 | cut -c -7`
   deploy:
     machine:
       enabled: true
@@ -17,4 +17,5 @@ jobs:
     steps:
       - checkout
       - run: |
+          make release DOCKER_USER=$DOCKER_USER DOCKER_PASS=$DOCKER_PASS TAG=`echo $CIRCLE_SHA1 | cut -c -7`
           make deploy DEPLOY_TOKEN=$DEPLOY_TOKEN TAG=`echo $CIRCLE_SHA1 | cut -c -7`
