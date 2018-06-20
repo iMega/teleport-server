@@ -33,6 +33,9 @@ var (
 		EmitDefaults: true,
 		OrigName:     true,
 	}
+	unmarshaller = jsonpb.Unmarshaler{
+		AllowUnknownFields: true,
+	}
 )
 
 type Entity interface {
@@ -46,9 +49,10 @@ type entityDB struct {
 	conn   *sql.DB
 	logger *logrus.Entry
 
-	create *sql.Stmt
-	update *sql.Stmt
-	remove *sql.Stmt
+	create  *sql.Stmt
+	update  *sql.Stmt
+	remove  *sql.Stmt
+	getByID *sql.Stmt
 
 	createRelation *sql.Stmt
 	deleteRelation *sql.Stmt
@@ -137,6 +141,10 @@ func (db *entityDB) setParepares() error {
 		return fmt.Errorf("failed to prepare remove query, %s", err)
 	}
 
+	if db.getByID, err = db.conn.Prepare("SELECT entity_type, entity FROM entities WHERE entity_id = ? AND removed=0"); err != nil {
+		return fmt.Errorf("failed to prepare getByID query, %s", err)
+	}
+
 	if db.createRelation, err = db.conn.Prepare("INSERT INTO relations(owner_id,subject_id,predicate,object_id,priority)VALUES(?,?,?,?,?)"); err != nil {
 		return fmt.Errorf("failed to prepare insert relations query, %s", err)
 	}
@@ -167,7 +175,35 @@ func (db *entityDB) CreateEntity(ctx context.Context, e Entity) (Entity, error) 
 }
 
 func (db *entityDB) GetEntityByID(ctx context.Context, ID string) (Entity, error) {
-	return nil, nil
+	var (
+		entityType string
+		data       []byte
+	)
+
+	if err := db.getByID.QueryRowContext(ctx, uuid.UID(ID)).Scan(&entityType, &data); err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			return nil, fmt.Errorf("entity not found")
+		case err != nil:
+			return nil, fmt.Errorf("failed getting entity, %s", err)
+		}
+	}
+
+	r, msg, err := decode(data, entityType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode entity, %s", err)
+	}
+
+	if err := unmarshaller.Unmarshal(r, msg); err != nil {
+		return nil, fmt.Errorf("failed getting entity, %s", err)
+	}
+
+	ent, ok := msg.(Entity)
+	if !ok {
+		return nil, fmt.Errorf("failed to convert entity, %s", err)
+	}
+
+	return ent, nil
 }
 
 func (db *entityDB) RemoveEntity(ctx context.Context, entityID uuid.UID) error {
