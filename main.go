@@ -98,7 +98,6 @@ func gqlContextOwnerIDMiddleware(h http.Handler) http.Handler {
 		}
 
 		ctx = context.WithValue(ctx, "owner_id", ownerID)
-
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
