@@ -1,0 +1,20 @@
+version: 2
+
+jobs:
+  build:
+    machine:
+      enabled: true
+    steps:
+      - checkout
+      - run: |
+          make release DOCKER_USER=$DOCKER_USER DOCKER_PASS=$DOCKER_PASS TAG=`echo $CIRCLE_SHA1 | cut -c -7`
+  deploy:
+    machine:
+      enabled: true
+    branches:
+      only:
+        - master
+    steps:
+      - checkout
+      - run: |
+          make deploy DEPLOY_TOKEN=$DEPLOY_TOKEN TAG=`echo $CIRCLE_SHA1 | cut -c -7`
