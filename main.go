@@ -60,7 +60,7 @@ func main() {
 		}
 	}))(m)
 	s := &http.Server{
-		Addr:         "0.0.0.0:8080",
+		Addr:         "0.0.0.0:80",
 		Handler:      hm,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
