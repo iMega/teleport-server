@@ -11,12 +11,12 @@ import (
 
 // CreateUserInput переданные аргументы для создания пользователя
 type CreateUserInput struct {
-	Pass *string
+	Pass string
 }
 
 // HasPass проверка, что значение пароль задано
 func (i *CreateUserInput) HasPass() bool {
-	if i.Pass == nil {
+	if len(i.Pass) < 1 {
 		return false
 	}
 	return true
@@ -25,7 +25,7 @@ func (i *CreateUserInput) HasPass() bool {
 // GetPass получение пароля из переданных аргументов
 func (i *CreateUserInput) GetPass() *string {
 	if i.HasPass() {
-		return i.Pass
+		return &i.Pass
 	}
 	return nil
 }
