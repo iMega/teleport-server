@@ -3,9 +3,17 @@ version: "3.3"
 services:
   app:
     image: imegateleport/teleport-server:latest
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=qwerty
+      - MYSQL_HOST=imega-teleport-db
+      - MYSQL_PORT=3306
+      - MYSQL_DBNAME=stock
 
   imega-teleport-db:
     image: mysql:5.7.19
+    ports:
+      - 3306:3306
     environment:
       - MYSQL_ROOT_PASSWORD=qwerty
       - MYSQL_DATABASE=stock

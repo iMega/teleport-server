@@ -10,12 +10,12 @@ import (
 
 // QueryCheckTokenInput переданные аргументы для проверки токена
 type QueryCheckTokenInput struct {
-	Token *string
+	Token string
 }
 
 // HasToken проверка, что значение токен задано
 func (i *QueryCheckTokenInput) HasToken() bool {
-	if i.Token == nil {
+	if len(i.Token) < 1 {
 		return false
 	}
 	return true
@@ -24,7 +24,7 @@ func (i *QueryCheckTokenInput) HasToken() bool {
 // GetToken получение токена из переданных аргументов
 func (i *QueryCheckTokenInput) GetToken() *string {
 	if i.HasToken() {
-		return i.Token
+		return &i.Token
 	}
 	return nil
 }

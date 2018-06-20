@@ -13,6 +13,8 @@ import (
 	"github.com/imega/teleport-server/resolver"
 	"github.com/imega/teleport-server/schema"
 	"github.com/imega/teleport-server/shutdown"
+	"github.com/improbable-eng/go-httpwares/logging/logrus"
+	"github.com/improbable-eng/go-httpwares/logging/logrus/ctxlogrus"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -52,9 +54,14 @@ func main() {
 	}
 
 	m.Handle("/", gqlContextOwnerIDMiddleware(gqlHandler))
+	hm := http_logrus.Middleware(logger, http_logrus.WithRequestFieldExtractor(func(req *http.Request) map[string]interface{} {
+		return map[string]interface{}{
+			"http.request.x-req-id": "unset",
+		}
+	}))(m)
 	s := &http.Server{
-		Addr:         "0.0.0.0:80",
-		Handler:      m,
+		Addr:         "0.0.0.0:8080",
+		Handler:      hm,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 		IdleTimeout:  5 * time.Second,
@@ -76,21 +83,16 @@ func main() {
 	logger.Info("server is stopped")
 }
 
-type srv struct {
-	Schema *graphql.Schema
-}
-
-func (srv) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("test"))
-}
-
 func gqlContextOwnerIDMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var ctx = r.Context()
+		var (
+			ctx    = r.Context()
+			logger = ctxlogrus.Extract(ctx)
+		)
 
 		ownerID := r.Header.Get("GRPC-METADATA-X-OWNER-ID")
 		if len(ownerID) == 0 {
-			//logger.Errorf("owner_id not found in headers")
+			logger.Errorf("owner_id not found in headers")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

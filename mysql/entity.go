@@ -8,6 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	"github.com/imega/teleport-server/config"
 	"github.com/imega/teleport-server/health"
 	"github.com/imega/teleport-server/shutdown"
 	"github.com/imega/teleport-server/uuid"
@@ -81,7 +82,32 @@ func (db *entityDB) ShutdownFunc() shutdown.ShutdownFunc {
 }
 
 func NewEntityDB(l *logrus.Entry) (Datastore, error) {
-	conn, err := sql.Open("mysql", "root:qwerty@tcp(imega-teleport-db:3306)/stock?charset=utf8")
+	user, err := config.GetConfigValue("MYSQL_USER")
+	if err != nil {
+		return nil, fmt.Errorf("failed getting env user, %s", err)
+	}
+
+	pass, err := config.GetConfigValue("MYSQL_PASSWORD")
+	if err != nil {
+		return nil, fmt.Errorf("failed getting env password, %s", err)
+	}
+
+	host, err := config.GetConfigValue("MYSQL_HOST")
+	if err != nil {
+		return nil, fmt.Errorf("failed getting env host, %s", err)
+	}
+
+	port, err := config.GetConfigValue("MYSQL_PORT")
+	if err != nil {
+		return nil, fmt.Errorf("failed getting env port, %s", err)
+	}
+
+	dbname, err := config.GetConfigValue("MYSQL_DBNAME")
+	if err != nil {
+		return nil, fmt.Errorf("failed getting env dbname, %s", err)
+	}
+
+	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true&loc=Local", user, pass, host, port, dbname))
 	if err != nil {
 		return nil, fmt.Errorf("failed to set driver, %s", err)
 	}
@@ -90,6 +116,8 @@ func NewEntityDB(l *logrus.Entry) (Datastore, error) {
 		conn:   conn,
 		logger: l,
 	}
+
+	db.HealthCheckFunc()()
 
 	return db, nil
 }

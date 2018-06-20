@@ -2,8 +2,10 @@ package token
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/imega/teleport-server/config"
 )
 
 var (
@@ -13,6 +15,20 @@ var (
 
 type Claims struct {
 	jwt.StandardClaims
+}
+
+func init() {
+	key, err := config.GetConfigValue("RSA_PUBLIC_KEY")
+	if err != nil {
+		log.Fatalf("failed to read public key %s", err)
+	}
+	RsaPublicKey = []byte(key)
+
+	key, err = config.GetConfigValue("RSA_PRIVATE_KEY")
+	if err != nil {
+		log.Fatalf("failed to read private key %s", err)
+	}
+	RsaPrivateKey = []byte(key)
 }
 
 // Create создание токена
