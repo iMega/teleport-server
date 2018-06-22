@@ -19,7 +19,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          echo "DEPLOY"
+          echo "DEPLOY 111"
           make release DOCKER_USER=$DOCKER_USER DOCKER_PASS=$DOCKER_PASS TAG=`echo $CIRCLE_SHA1 | cut -c -7`
 
 workflows:
