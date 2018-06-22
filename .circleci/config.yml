@@ -4,9 +4,6 @@ jobs:
   build:
     machine:
       enabled: true
-    branches:
-      ignore:
-        - master
     steps:
       - checkout
       - run: |
@@ -24,7 +21,10 @@ workflows:
   version: 2
   build_and_release:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              ignore: master
       - release:
           filters:
             branches:
