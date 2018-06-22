@@ -7,26 +7,25 @@ jobs:
     steps:
       - checkout
       - run: |
-          echo "BUILD"
           make build TAG=`echo $CIRCLE_SHA1 | cut -c -7`
 
-  deploy:
+  release:
     machine:
       enabled: true
     steps:
       - checkout
       - run: |
-          echo "DEPLOY 111"
-          make release DOCKER_USER=$DOCKER_USER DOCKER_PASS=$DOCKER_PASS TAG=`echo $CIRCLE_SHA1 | cut -c -7`
+          make build release DOCKER_USER=$DOCKER_USER DOCKER_PASS=$DOCKER_PASS TAG=`echo $CIRCLE_SHA1 | cut -c -7`
 
 workflows:
   version: 2
-  build_and_test:
+  build_and_release:
     jobs:
-      - build
-      - deploy:
-          requires:
-            - build
+      - build:
+          filters:
+          branches:
+            ignore: master
+      - release:
           filters:
             branches:
               only: master
