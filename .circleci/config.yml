@@ -13,9 +13,6 @@ jobs:
   deploy:
     machine:
       enabled: true
-    branches:
-      only:
-        - master
     steps:
       - checkout
       - run: |
