@@ -36,7 +36,7 @@ error:
 
 test: clean build acceptance
 
-release: build
+release:
 	@docker login --username $(DOCKER_USER) --password $(DOCKER_PASS)
 	@docker push $(IMG):$(TAG)
 
