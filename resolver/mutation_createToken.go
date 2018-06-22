@@ -41,6 +41,8 @@ func (i *CreateTokenInput) GetPass() *string {
 
 // CreateToken создание токена
 func (r *Resolver) CreateToken(ctx context.Context, in CreateTokenInput) (string, error) {
+	var errorFailCreateToken = fmt.Errorf("failed to create token")
+
 	logger := ctxlogrus.Extract(ctx)
 	ownerID, err := owner.GetOwnerIDFromContext(ctx)
 	if err != nil {
@@ -51,6 +53,23 @@ func (r *Resolver) CreateToken(ctx context.Context, in CreateTokenInput) (string
 	if !in.HasPass() {
 		logger.Errorf("CreateToken: password is empty")
 		return "", fmt.Errorf("password is empty")
+	}
+
+	userNode, err := r.EntityDB.GetEntityByID(ctx, string(ownerID))
+	if err != nil {
+		logger.Errorf("CreateToken: failed getting user record, %s", err)
+		return "", fmt.Errorf("failed getting user")
+	}
+
+	user, ok := userNode.(*api.User)
+	if !ok {
+		logger.Errorf("CreateToken: failed to convert entity to api.user, %s", err)
+		return "", errorFailCreateToken
+	}
+
+	if *in.GetPass() != user.GetPass() {
+		logger.Errorf("CreateToken: password is invalid")
+		return "", errorFailCreateToken
 	}
 
 	entityID := uuid.NewUUID()
