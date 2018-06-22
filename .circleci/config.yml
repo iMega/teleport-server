@@ -15,9 +15,6 @@ jobs:
   release:
     machine:
       enabled: true
-    branches:
-      only:
-        - master
     steps:
       - checkout
       - run: |
@@ -28,4 +25,7 @@ workflows:
   build_and_release:
     jobs:
       - build
-      - release
+      - release:
+          filters:
+            branches:
+              only: master
