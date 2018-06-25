@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
@@ -115,6 +117,10 @@ func NewEntityDB(l *logrus.Entry) (Datastore, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to set driver, %s", err)
 	}
+
+	conn.SetMaxIdleConns(2)
+	conn.SetMaxOpenConns(10)
+	conn.SetConnMaxLifetime(time.Second * 10)
 
 	db := &entityDB{
 		conn:   conn,
