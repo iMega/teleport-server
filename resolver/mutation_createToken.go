@@ -76,6 +76,7 @@ func (r *Resolver) CreateToken(ctx context.Context, in CreateTokenInput) (string
 	expireAt := time.Now().Add(time.Hour * 10).Unix()
 	tokenStr, err := token.Create(string(entityID), expireAt)
 	if err != nil {
+		logger.Errorf("CreateToken: %s", err)
 		return "", fmt.Errorf("CreateToken, %s", err)
 	}
 
